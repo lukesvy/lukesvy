@@ -1,0 +1,178 @@
+<!DOCTYPE html> <!-- this sets the document to be in a html format -->
+<html lang="en"> <!-- sets the language to english -->
+  <head>
+    <meta charset="UTF-8" /> <!-- default setting for character encoding -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /> sets size of the page, the viewpoint makes it 
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <title>Document</title>
+    <style>
+    body {
+      text-align: center; 
+      color: white;
+  background-image: url("background.jpg");
+}
+</style>
+  </head>
+  
+  <body>
+    
+
+
+    <h1>Daily calorie count</h1>
+<p>
+    Date <input id = "date" type="date"></br>
+    Breakfast <input id="breakfast" type = "number" value='0'></br>
+    Lunch  <input id="lunch" type = "number" value='0'></br>
+    Dinner <input id="dinner" type = "number" value='0'></br>
+    Snacks <input id="snacks" type = "number" value='0'>
+    <button id = "submit" type="button">Submit</button></br>
+
+    <canvas id="chart" width="600" height="600"></canvas>
+  </p>
+    <script>
+ var myChart;
+      const button = document.getElementById('submit');
+      button.addEventListener('click', async event => {
+
+        // Task 03
+        var date = document.getElementById('date').value;
+        var breakfast = document.getElementById('breakfast').value;
+        var lunch = document.getElementById('lunch').value;
+        var dinner = document.getElementById('dinner').value;
+        var snacks = document.getElementById('snacks').value;
+
+
+        const data = {date, breakfast, lunch, dinner, snacks};
+        const options = {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        };
+        const response = await fetch('/api', options);
+        const json = await response.json();
+        console.log(json);
+        chartIt();
+      });
+chartIt();
+async function chartIt(){
+  const response = await fetch('/api');
+  const data = await response.json();
+
+  let date=[];
+  let breakfast=[];
+  let lunch=[];
+  let dinner=[];
+  let snacks=[];
+  let target=[];
+
+  for(let i=0;i<data.length;i++){
+    date[i]=data[i].date;
+    breakfast[i]=data[i].breakfast;
+    lunch[i]=data[i].lunch;
+    dinner[i]=data[i].dinner;
+    snacks[i]=data[i].snacks;
+    target[i]=1100;
+  }
+
+  if(!myChart){
+  const ctx=document.getElementById('chart').getContext('2d');
+  myChart=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:date,
+      datasets:[
+        {
+          label:'Target line',
+          data:target,
+          type:'line',
+          fill:false,
+          backgroundColor:'black',
+          borderColor:'black'
+        },
+        {
+          label:'Breakfast',
+          data:breakfast,
+          backgroundColor:'#B89414'
+        },
+        {
+          label:'Lunch',
+          data:lunch,
+          backgroundColor:'#FCCB1D'
+        },
+        {
+          label:'Dinner',
+          data:dinner,
+          backgroundColor:'#6455A5'
+
+        },
+        {
+          label:'Snacks',
+          data:snacks,
+          backgroundColor:'#DAD4F7'
+
+        },
+      ],
+    },
+    options:{
+      title:{
+        text:'Daily kcal intake'
+      },
+      scales:{
+        xAxes:[{
+          stacked:true,
+          scalableLabel:{
+            display:true,
+            labelString:'Date'
+          },
+        }],
+        yAxes:[{
+          stacked:true,
+          scalableLabel:{
+            display:true,
+            labelString:'Kcal'
+          },
+        }],
+      }
+    }
+
+  })
+}
+else{
+  myChart.data.labels=date;
+  myChart.data.datasets[0].data=breakfast;
+    myChart.data.datasets[1].data=lunch;
+      myChart.data.datasets[2].data=dinner;
+      myChart.data.datasets[3].data=snacks;
+
+
+  myChart.update();
+}
+}
+      // if ('geolocation' in navigator) {
+      //   console.log('geolocation available');
+      //   navigator.geolocation.getCurrentPosition(async position => {
+      //     lat = position.coords.latitude;
+      //     lon = position.coords.longitude;
+      //     document.getElementById('latitude').textContent = lat;
+      //     document.getElementById('longitude').textContent = lon;
+      //     getWeather(); // Task 03
+      //   });
+      // } else {
+      //   console.log('geolocation not available');
+      // }
+
+      // Task 03
+      // async function getWeather(){
+      //   url = `http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=89cba66085cac69ac52e9d7c3adbd3b8`;
+      //   const response = await fetch(url);
+      //   const weatherData = await response.json();
+      //   weather = weatherData.weather[0].main;
+      //   document.getElementById('weather').textContent = weather;
+      // }
+
+    </script>
+  </body>
+</html>
